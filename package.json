@@ -1,0 +1,26 @@
+{
+  "name": "hds-api",
+  "version": "0.0.1",
+  "description": "HTTP API to interact with hds",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "cheminfo/hds-api",
+  "keywords": [
+    "hierarchical",
+    "data",
+    "store",
+    "hds",
+    "api"
+  ],
+  "author": {
+    "name": "Michaël Zasso",
+    "email": "michael.zasso@epfl.ch"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cheminfo/hds-api/issues"
+  },
+  "homepage": "https://github.com/cheminfo/hds-api"
+}
