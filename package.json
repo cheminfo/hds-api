@@ -4,7 +4,7 @@
   "description": "HTTP API to interact with hds",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --require should --reporter mocha-better-spec-reporter --recursive"
   },
   "repository": "cheminfo/hds-api",
   "keywords": [
@@ -22,5 +22,12 @@
   "bugs": {
     "url": "https://github.com/cheminfo/hds-api/issues"
   },
-  "homepage": "https://github.com/cheminfo/hds-api"
+  "homepage": "https://github.com/cheminfo/hds-api",
+  "devDependencies": {
+    "koa": "latest",
+    "mocha": "latest",
+    "mocha-better-spec-reporter": "latest",
+    "should": "latest",
+    "supertest": "latest"
+  }
 }
