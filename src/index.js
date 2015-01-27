@@ -5,7 +5,40 @@ var mount = require('koa-mount');
 
 var entry = require('./routes/entry');
 
-module.exports = function hdsAPIFactory(app, hds) {
+module.exports = function hdsAPIFactory(app, hds, options) {
+
+    options = options || {};
+
+    app.context.hds_jsonError = function (code, message, details) {
+        this.status = code;
+        this.body = {
+            error: message
+        };
+        if (details) {
+            this.body.details = details;
+        }
+    };
+
+    if (options.cors) {
+        var origin = options.cors.origin || '*';
+        app.use(function*(next) {
+            this.set('Access-Control-Allow-Origin', origin);
+            if (this.method === 'OPTIONS') {
+                this.status = 200;
+                this.set('Allow', 'GET,POST,PUT,DELETE,OPTIONS');
+                this.set('Access-Control-Allow-Headers', 'content-type');
+            } else {
+                yield next;
+            }
+        });
+    }
+
+    app.use(function*(next) {
+        yield next;
+        if (!this.body) {
+            return this.hds_jsonError(404, 'No route matching "' + this.method + ' ' + this.path + '"');
+        }
+    });
 
     var router = new Router();
 
