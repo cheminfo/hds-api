@@ -29,5 +29,9 @@
     "mocha-better-spec-reporter": "latest",
     "should": "latest",
     "supertest": "latest"
+  },
+  "dependencies": {
+    "koa-mount": "^1.3.0",
+    "koa-router": "^3.8.0"
   }
 }
