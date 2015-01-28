@@ -34,6 +34,7 @@ module.exports = function hdsAPIFactory(app, hds, options) {
     }
 
     app.use(function*(next) {
+        this.state.hds_host = this.protocol + '://' + this.host + '/';
         yield next;
         if (!this.body) {
             return this.hds_jsonError(404, 'No route matching "' + this.method + ' ' + this.path + '"');
