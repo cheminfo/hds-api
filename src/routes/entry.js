@@ -13,7 +13,8 @@ module.exports = function (hds) {
 
     function*getEntry() {
         try {
-            var entry = yield hds.Entry.findOne(this.params.kind, {_id: this.params.entryId}).exec();
+            var kind = yield hds.Kind.get(this.params.kind);
+            var entry = yield kind.findOne({_id: this.params.entryId}).exec();
             if (entry) {
                 this.body = entry;
             } else {
