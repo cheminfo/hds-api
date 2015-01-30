@@ -54,10 +54,14 @@ module.exports = function (hds) {
 
     function*getAttachment() {
         var entry = this.state.hds_entry;
-        var att = yield entry.getAttachment(this.params.attachmentId);
-        this.set('Content-Type', att.mime);
-        this.set('Content-Disposition', 'attachment;filename="' + att.name + '"');
-        this.body = att.content;
+        try {
+            var att = yield entry.getAttachment(this.params.attachmentId);
+            this.set('Content-Type', att.mimetype);
+            this.set('Content-Disposition', 'attachment;filename="' + att.filename + '"');
+            this.body = att.content;
+        } catch (e) {
+            this.hds_jsonError(404, 'attachment ' + this.params.attachmentId + ' not found');
+        }
     }
 
 };
