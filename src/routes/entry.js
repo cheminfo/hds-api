@@ -55,10 +55,10 @@ module.exports = function (hds) {
     function*getAttachment() {
         var entry = this.state.hds_entry;
         try {
-            var att = yield entry.getAttachment(this.params.attachmentId);
+            var att = yield entry.getAttachment(this.params.attachmentId, true);
             this.set('Content-Type', att.mimetype);
             this.set('Content-Disposition', 'attachment;filename="' + att.filename + '"');
-            this.body = att.content;
+            this.body = att.stream;
         } catch (e) {
             this.hds_jsonError(404, 'attachment ' + this.params.attachmentId + ' not found');
         }
