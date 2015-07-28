@@ -15,6 +15,7 @@ describe('hds API', function () {
         var app = koa();
         hdsapi(app, hds);
         var agent = request.agent(app.callback());
+
         describe('when kind and entry both exists', function () {
             it('should return the entry', function (done) {
                 agent
@@ -24,6 +25,7 @@ describe('hds API', function () {
                     .expect({_id:constants.ENTRY_ID_EXIST, field1:'hello'}, done);
             });
         });
+
         describe('when kind exists and entry does not', function () {
             it('should return 404', function (done) {
                 agent
@@ -33,6 +35,7 @@ describe('hds API', function () {
                     .expect(/entry 0{23}1 not found/, done);
             });
         });
+
         describe('when kind does not exist', function () {
             it('should return 404', function (done) {
                 agent
@@ -42,6 +45,7 @@ describe('hds API', function () {
                     .expect(/kind kind2 not found/, done);
             });
         });
+
         describe('when entryId is not valid', function () {
             it('should return 400', function (done) {
                 agent
