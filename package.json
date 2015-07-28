@@ -18,20 +18,23 @@
     "name": "Michaël Zasso",
     "email": "michael.zasso@epfl.ch"
   },
+  "contributors": [
+    "Miguel Asencio"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/cheminfo/hds-api/issues"
   },
   "homepage": "https://github.com/cheminfo/hds-api",
   "devDependencies": {
-    "koa": "latest",
     "mocha": "latest",
     "mocha-better-spec-reporter": "latest",
     "should": "latest",
     "supertest": "latest"
   },
   "dependencies": {
+    "koa": "^0.21.0",
     "koa-mount": "^1.3.0",
-    "koa-router": "^3.8.0"
+    "koa-router": "^5.1.2"
   }
 }
