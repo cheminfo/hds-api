@@ -1,6 +1,5 @@
 'use strict';
 
-var koa = require('koa');
 var request = require('supertest');
 var hdsapi = require('..');
 var hds = require('./hds');
@@ -12,8 +11,7 @@ var regJson = /application\/json/;
 describe('hds API', function () {
 
     describe('getting single entries', function () {
-        var app = koa();
-        hdsapi(app, hds);
+        var app = hdsapi(hds);
         var agent = request.agent(app.callback());
 
         describe('when kind and entry both exists', function () {

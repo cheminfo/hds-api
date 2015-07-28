@@ -1,11 +1,14 @@
 'use strict';
 
+var koa = require('koa');
 var Router = require('koa-router');
 var mount = require('koa-mount');
 
 var entry = require('./routes/entry');
 
-module.exports = function hdsAPIFactory(app, hds, options) {
+module.exports = function hdsAPIFactory(hds, options) {
+
+    var app = koa();
 
     options = options || {};
 
@@ -53,5 +56,7 @@ module.exports = function hdsAPIFactory(app, hds, options) {
     app.use(router.middleware());
 
     app.use(mount('/entry', entry(hds)));
+
+    return app;
 
 };
