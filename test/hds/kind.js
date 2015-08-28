@@ -10,6 +10,14 @@ exports.get = function (kind) {
     }
 };
 
+exports.post = function (kind) {
+    if (kind === constants.KIND_EXIST) {
+        return Promise.resolve(FakeKind);
+    } else {
+        return Promise.reject('Kind ' + kind + ' is not loaded');
+    }
+};
+
 var FakeKind = {};
 FakeKind.findOne = function (conditions) {
     return {

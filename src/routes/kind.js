@@ -15,15 +15,13 @@ module.exports = function (hds) {
 
     var router = new Router();
 
-    router.post('/:kind', createEntry);
-
     router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, getEntry);
 
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
 
     return router.middleware();
 
-    function* checkKind(next) {
+    function *checkKind(next) {
         try {
             this.state.hds_kind = yield hds.Kind.get(this.params.kind);
         } catch (e) {
@@ -32,7 +30,7 @@ module.exports = function (hds) {
         yield next;
     }
 
-    function* checkEntry(next) {
+    function *checkEntry(next) {
         var entry = yield this.state.hds_kind.findOne({_id: this.params.entryId}).exec();
         if (entry) {
             this.state.hds_entry = entry;
@@ -42,7 +40,7 @@ module.exports = function (hds) {
         }
     }
 
-    function* getEntry() {
+    function *getEntry() {
         var entry = this.state.hds_entry.toObject();
         if (entry._at) {
             var i = 0, l = entry._at.length, at;
@@ -54,7 +52,7 @@ module.exports = function (hds) {
         this.body = entry;
     }
 
-    function* getAttachment() {
+    function *getAttachment() {
         var entry = this.state.hds_entry;
         try {
             var att = yield entry.getAttachment(this.params.attachmentId, true);
@@ -66,15 +64,4 @@ module.exports = function (hds) {
         }
     }
 
-    function* createEntry(kind) {
-        var data = this.query;
-        hds.Kind.create(kind, data).save().then(function (value) {
-            this.body = {
-                status: 'created',
-                entryID: value._id
-            };
-        }).catch(function (err) {
-            this.hds_jsonError(400, '{ "error": "' + err + '" }');
-        });
-    }
 };
