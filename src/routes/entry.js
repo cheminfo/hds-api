@@ -15,7 +15,7 @@ module.exports = function (hds) {
 
     var router = new Router();
 
-    router.post('/:kind', createEntry);
+    router.post('/:kind', checkKind, createEntry);
 
     router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, getEntry);
 
@@ -66,15 +66,16 @@ module.exports = function (hds) {
         }
     }
 
-    function* createEntry(kind) {
+    function* createEntry() {
         var data = this.query;
-        hds.Kind.create(kind, data).save().then(function (value) {
+        try {
+            var value = yield hds.Kind.create(this.params.kind, data).save();
             this.body = {
                 status: 'created',
                 entryID: value._id
             };
-        }).catch(function (err) {
-            this.hds_jsonError(400, '{ "error": "' + err + '" }');
-        });
+        } catch(err) {
+            this.hds_jsonError(500, err);
+        }
     }
 };
