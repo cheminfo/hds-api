@@ -19,6 +19,8 @@ module.exports = function (hds) {
 
     router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, getEntry);
 
+    router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, deleteEntry);
+
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
 
     return router.middleware();
@@ -75,6 +77,15 @@ module.exports = function (hds) {
                 entryID: value._id
             };
         } catch(err) {
+            this.hds_jsonError(500, err);
+        }
+    }
+
+    function* deleteEntry() {
+        try {
+            yield this.state.hds_entry.remove();
+            this.body = {status: 'deleted'};
+        } catch (err) {
             this.hds_jsonError(500, err);
         }
     }
