@@ -73,7 +73,7 @@ module.exports = function (hds) {
     function* createEntry() {
         var data = this.query;
         try {
-            var value = yield hds.Kind.create(this.params.kind, data).save();
+            var value = yield this.state.hds_kind.create(this.params.kind, data).save();
             this.body = {
                 status: 'created',
                 entryID: value._id
