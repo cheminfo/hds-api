@@ -19,6 +19,8 @@ module.exports = function (hds) {
 
     router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, getEntry);
 
+    router.put('/:kind/:entryId', validateEntry, checkKind, checkEntry, changeEntry);
+
     router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, deleteEntry);
 
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
@@ -85,6 +87,15 @@ module.exports = function (hds) {
         try {
             yield this.state.hds_entry.remove();
             this.body = {status: 'deleted'};
+        } catch (err) {
+            this.hds_jsonError(500, err);
+        }
+    }
+
+    function* changeEntry() {
+        try {
+            yield this.state.hds_entry.update({ $set: this.params.data});
+            this.body = {status: 'modified'};
         } catch (err) {
             this.hds_jsonError(500, err);
         }
