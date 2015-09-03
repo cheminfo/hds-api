@@ -25,6 +25,8 @@ module.exports = function (hds) {
 
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
 
+    router.get('/:kind/_find', validateEntry, checkKind, multipleEntries, queryEntry);
+
     return router.middleware();
 
     function* checkKind(next) {
@@ -43,6 +45,16 @@ module.exports = function (hds) {
             yield next;
         } else {
             this.hds_jsonError(404, 'entry ' + this.params.entryId + ' not found');
+        }
+    }
+
+    function* multipleEntries(next) {
+        var entry = yield this.state.hds_kind.find(this.request.find.query).exec();
+        if (entry) {
+            this.state.hds_entries = entry;
+            yield next;
+        } else {
+            this.hds_jsonError(404, 'entries ' + this.request.find.query + ' not found');
         }
     }
 
@@ -96,6 +108,25 @@ module.exports = function (hds) {
         try {
             yield this.state.hds_entry.update({ $set: this.params.data});
             this.body = {status: 'modified'};
+        } catch (err) {
+            this.hds_jsonError(500, err);
+        }
+    }
+
+    function* queryEntry() {
+        try {
+            var from = this.request.find.from || 0;
+            var limit = this.request.find.limit || 20;
+            var entries = yield this.state.hds_entries.aggregate([
+                {$skip: from},
+                {$limit: limit}
+            ]).exec();
+            this.body = {
+                from: from,
+                to: limit,
+                total: (limit - from),
+                entry: entries
+            };
         } catch (err) {
             this.hds_jsonError(500, err);
         }
