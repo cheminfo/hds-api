@@ -15,19 +15,19 @@ module.exports = function (hds) {
 
     var router = new Router();
 
+    // entries methods
     router.post('/:kind', checkKind, createEntry);
-
     router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, getEntry);
-
     router.put('/:kind/:entryId', validateEntry, checkKind, checkEntry, changeEntry);
-
     router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, deleteEntry);
-
-    router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
-
     router.get('/:kind/_find', validateEntry, checkKind, multipleEntries, queryEntry);
 
+    // attachments methods
+    router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
+
     return router.middleware();
+
+    // middlewares
 
     function* checkKind(next) {
         try {
@@ -58,6 +58,8 @@ module.exports = function (hds) {
         }
     }
 
+    // entries methods
+
     function* getEntry() {
         var entry = this.state.hds_entry.toObject();
         if (entry._at) {
@@ -68,18 +70,6 @@ module.exports = function (hds) {
             }
         }
         this.body = entry;
-    }
-
-    function* getAttachment() {
-        var entry = this.state.hds_entry;
-        try {
-            var att = yield entry.getAttachment(this.params.attachmentId, true);
-            this.set('Content-Type', att.mimetype);
-            this.set('Content-Disposition', 'attachment;filename="' + att.filename + '"');
-            this.body = att.stream;
-        } catch (e) {
-            this.hds_jsonError(404, 'attachment ' + this.params.attachmentId + ' not found');
-        }
     }
 
     function* createEntry() {
@@ -129,6 +119,20 @@ module.exports = function (hds) {
             };
         } catch (err) {
             this.hds_jsonError(500, err);
+        }
+    }
+
+    // attachments methods
+
+    function* getAttachment() {
+        var entry = this.state.hds_entry;
+        try {
+            var att = yield entry.getAttachment(this.params.attachmentId, true);
+            this.set('Content-Type', att.mimetype);
+            this.set('Content-Disposition', 'attachment;filename="' + att.filename + '"');
+            this.body = att.stream;
+        } catch (e) {
+            this.hds_jsonError(404, 'attachment ' + this.params.attachmentId + ' not found');
         }
     }
 };
