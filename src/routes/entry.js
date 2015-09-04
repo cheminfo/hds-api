@@ -127,7 +127,7 @@ module.exports = function (hds) {
     function* getAttachment() {
         var entry = this.state.hds_entry;
         try {
-            var att = yield entry.getAttachment(this.params.attachmentId, true);
+            var att = yield entry.getFile(this.params.attachmentId, true);
             this.set('Content-Type', att.mimetype);
             this.set('Content-Disposition', 'attachment;filename="' + att.filename + '"');
             this.body = att.stream;
