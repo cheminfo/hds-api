@@ -97,7 +97,7 @@ module.exports = function (hds) {
 
     function* changeEntry() {
         try {
-            yield this.state.hds_entry.update({ $set: this.params.data});
+            yield hds.Entry.update({_id: this.state.hds_entry._id}, { $set: this.request.body});
             this.body = {status: 'modified'};
         } catch (err) {
             this.hds_jsonError(500, err);
@@ -119,6 +119,7 @@ module.exports = function (hds) {
                 entry: entries
             };
         } catch (err) {
+            console.log(err);
             this.hds_jsonError(500, err);
         }
     }
