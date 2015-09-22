@@ -74,9 +74,9 @@ module.exports = function (hds) {
     }
 
     function* createEntry() {
-        var data = this.query;
+        var data = this.request.body;
         try {
-            var value = yield this.state.hds_kind.create(this.params.kind, data).save();
+            var value = yield hds.Entry.create(this.params.kind, data, {owner: 'test@cheminfo.org'}).save();
             this.body = {
                 status: 'created',
                 entryID: value._id
@@ -139,7 +139,7 @@ module.exports = function (hds) {
 
     function* replaceAttachment() {
         var entry = this.state.hds_entry;
-        var new_att = this.query;
+        var new_att = this.request.body;
         try {
             var att = yield entry.getFile(this.params.attachmentId, true);
             att.mimetype = new_att.mimetype;
