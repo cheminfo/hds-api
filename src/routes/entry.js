@@ -24,6 +24,7 @@ module.exports = function (hds) {
 
     // attachments methods
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
+    router.put('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, replaceAttachment);
 
     return router.middleware();
 
@@ -131,6 +132,20 @@ module.exports = function (hds) {
             this.set('Content-Type', att.mimetype);
             this.set('Content-Disposition', 'attachment;filename="' + att.filename + '"');
             this.body = att.stream;
+        } catch (e) {
+            this.hds_jsonError(404, 'attachment ' + this.params.attachmentId + ' not found');
+        }
+    }
+
+    function* replaceAttachment() {
+        var entry = this.state.hds_entry;
+        var new_att = this.query;
+        try {
+            var att = yield entry.getFile(this.params.attachmentId, true);
+            att.mimetype = new_att.mimetype;
+            att.filename = new_att.filename;
+            att.content = new_att.content;
+            this.body = {status: 'modified'};
         } catch (e) {
             this.hds_jsonError(404, 'attachment ' + this.params.attachmentId + ' not found');
         }
