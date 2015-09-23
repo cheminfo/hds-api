@@ -6,5 +6,5 @@ services:
   - mongodb -port 27119
 before_script:
   - sleep 15
-  - node test/realDB/import.js
-sudo: false
+  - node test/import.js
+sudo: required
