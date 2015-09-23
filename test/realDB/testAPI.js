@@ -30,15 +30,14 @@ function onSuccess() {
             var ans = (res.body.status == 'created');
             if (ans) console.log('created with id:', res.body.entryID);
 
-            // change entry
-            agent.put('/entry/experiment/'+res.body.entryID)
-                .send({name:'myExperiment2',id:'ghi789'})
+            // query entry
+            agent.post('/entry/experiment/_find')
+                .send({query: {id: 'def456'}})
                 .expect(200)
                 .expect('Content-Type', regJson)
                 .end(function (err, res) {
                     if (err) throw err;
-                    var ans = (res.body.status == 'modified');
-                    if (ans) console.log('modified');
+                    console.log('got it:',res.body);
 
                     // simple query
                     agent.get('/entry/experiment/55e9b0b5867a77ee20623bdb')
@@ -56,17 +55,17 @@ function onSuccess() {
 
     /*
     // query entry
-    agent.get('/entry/experiment/{query:{id:"def456"}}')
+    agent.post('/entry/experiment/_find')
+        .send({query: {id: 'def456'}})
         .expect(200)
         .expect('Content-Type', regJson)
         .end(function (err, res) {
             if (err) throw err;
-            var ans = (res.body.total == 1);
-            if (ans) console.log('got it:',res.body.entry[0]);
+            console.log('got it:',res.body);
         });
 
     // change entry
-    agent.put('/entry/experiment'+res.body.entryID)
+    agent.put('/entry/experiment/'+res.body.entryID)
         .send({name:'myExperiment2',id:'ghi789'})
         .expect(200)
         .expect('Content-Type', regJson)
@@ -77,7 +76,7 @@ function onSuccess() {
         });
 
     // delete entry
-    agent.delete('/entry/experiment'+res.body.entryID)
+    agent.delete('/entry/experiment/'+res.body.entryID)
         .expect(200)
         .expect('Content-Type', regJson)
         .end(function (err, res) {

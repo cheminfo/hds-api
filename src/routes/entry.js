@@ -20,7 +20,7 @@ module.exports = function (hds) {
     router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, getEntry);
     router.put('/:kind/:entryId', validateEntry, checkKind, checkEntry, changeEntry);
     router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, deleteEntry);
-    router.get('/:kind/_find', validateEntry, checkKind, multipleEntries, queryEntry);
+    router.post('/:kind/_find', checkKind, queryEntry);
 
     // attachments methods
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
@@ -46,16 +46,6 @@ module.exports = function (hds) {
             yield next;
         } else {
             this.hds_jsonError(404, 'entry ' + this.params.entryId + ' not found');
-        }
-    }
-
-    function* multipleEntries(next) {
-        var entry = yield this.state.hds_kind.find(this.request.find.query).exec();
-        if (entry) {
-            this.state.hds_entries = entry;
-            yield next;
-        } else {
-            this.hds_jsonError(404, 'entries ' + this.request.find.query + ' not found');
         }
     }
 
@@ -106,20 +96,23 @@ module.exports = function (hds) {
 
     function* queryEntry() {
         try {
-            var from = this.request.find.from || 0;
-            var limit = this.request.find.limit || 20;
-            var entries = yield this.state.hds_entries.aggregate([
-                {$skip: from},
-                {$limit: limit}
-            ]).exec();
+            var data = this.request.body;
+            var from = data.from || 0;
+            var limit = data.limit || 20;
+            var entries = yield this.state.hds_kind
+                .find(data.query)
+                .skip(from)
+                .limit(limit - from)
+                .exec();
+            if (!entries)
+                this.hds_jsonError(404, 'entries ' + this.request.find.query + ' not found');
             this.body = {
                 from: from,
-                to: limit,
-                total: (limit - from),
+                to: entries.length + from,
+                total: entries.length,
                 entry: entries
             };
         } catch (err) {
-            console.log(err);
             this.hds_jsonError(500, err);
         }
     }
