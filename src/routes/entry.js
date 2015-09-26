@@ -16,11 +16,11 @@ module.exports = function (hds) {
     var router = new Router();
 
     // entries methods
-    router.post('/:kind', checkKind, createEntry);
-    router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, getEntry);
-    router.put('/:kind/:entryId', validateEntry, checkKind, checkEntry, changeEntry);
-    router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, deleteEntry);
-    router.post('/:kind/_find', checkKind, queryEntry);
+    router.post('/:kind', checkKind, checkUser, createEntry);
+    router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, getEntry);
+    router.put('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, changeEntry);
+    router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, deleteEntry);
+    router.post('/:kind/_find', checkKind, checkUser, queryEntry);
 
     // attachments methods
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
@@ -29,6 +29,15 @@ module.exports = function (hds) {
     return router.middleware();
 
     // middlewares
+
+    function* checkUser(next) {
+        if (!this.state.user) {
+            this.state.user = {
+                email: 'test@test.com'
+            };
+        }
+        yield next;
+    }
 
     function* checkKind(next) {
         try {
@@ -66,7 +75,7 @@ module.exports = function (hds) {
     function* createEntry() {
         var data = this.request.body;
         try {
-            var value = yield hds.Entry.create(this.params.kind, data, {owner: 'test@cheminfo.org'}).save();
+            var value = yield hds.Entry.create(this.params.kind, data, {owner: this.state.user.email}).save();
             this.body = {
                 status: 'created',
                 entryID: value._id
@@ -87,7 +96,10 @@ module.exports = function (hds) {
 
     function* changeEntry() {
         try {
-            yield hds.Entry.update({_id: this.state.hds_entry._id}, { $set: this.request.body});
+            for (var i in this.request.body)
+                if (i[0] !== '_')
+                    this.state.hds_entry[i] = this.request.body[i];
+            yield this.state.hds_entry.save();
             this.body = {status: 'modified'};
         } catch (err) {
             this.hds_jsonError(500, err);
@@ -102,7 +114,7 @@ module.exports = function (hds) {
             var entries = yield this.state.hds_kind
                 .find(data.query)
                 .skip(from)
-                .limit(limit - from)
+                .limit(limit)
                 .exec();
             if (!entries)
                 this.hds_jsonError(404, 'entries ' + this.request.find.query + ' not found');
