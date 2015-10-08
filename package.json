@@ -1,6 +1,6 @@
 {
   "name": "hds-api",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "HTTP API to interact with hds",
   "main": "src/index.js",
   "scripts": {
