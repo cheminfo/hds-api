@@ -3,6 +3,7 @@
 var koa = require('koa');
 var Router = require('koa-router');
 var mount = require('koa-mount');
+var bodyParser = require('koa-body-parser');
 
 var entry = require('./routes/entry');
 
@@ -54,7 +55,7 @@ module.exports = function hdsAPIFactory(hds, options) {
     });
 
     app.use(router.middleware());
-
+    app.use(bodyParser());
     app.use(mount('/entry', entry(hds)));
 
     return app;

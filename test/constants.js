@@ -1,7 +1,0 @@
-'use strict';
-
-exports.KIND_EXIST = 'kind1';
-exports.KIND_NOTEXIST = 'kind2';
-
-exports.ENTRY_ID_EXIST = '000000000000000000000000';
-exports.ENTRY_ID_NOTEXIST = '000000000000000000000001';

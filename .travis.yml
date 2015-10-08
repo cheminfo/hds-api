@@ -2,4 +2,9 @@ language: node_js
 node_js:
   - "0.12"
   - "iojs"
-sudo: false
+services:
+  - mongodb -port 27119
+before_script:
+  - sleep 15
+  - node test/import.js
+sudo: required
