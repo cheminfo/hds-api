@@ -6,6 +6,7 @@ var mount = require('koa-mount');
 var bodyParser = require('koa-body-parser');
 
 var entry = require('./routes/entry');
+var kind = require('./routes/kind');
 
 module.exports = function hdsAPIFactory(hds, options) {
 
@@ -57,6 +58,7 @@ module.exports = function hdsAPIFactory(hds, options) {
     app.use(router.middleware());
     app.use(bodyParser());
     app.use(mount('/entry', entry(hds)));
+    app.use(mount('/kind', kind(hds)));
 
     return app;
 
