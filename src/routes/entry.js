@@ -16,47 +16,17 @@ module.exports = function (hds) {
     var router = new Router();
 
     // entries methods
-    router.post('/:kind', checkKind, checkUser, createEntry);
-    router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, getEntry);
-    router.put('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, changeEntry);
-    router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, deleteEntry);
-    router.post('/:kind/_find', checkKind, checkUser, queryEntry);
+    router.post('/:kind', middleware.checkKind, middleware.checkUser, createEntry);
+    router.get('/:kind/:entryId', validateEntry, middleware.checkKind, middleware.checkEntry, middleware.checkUser, getEntry);
+    router.put('/:kind/:entryId', validateEntry, middleware.checkKind, middleware.checkEntry, middleware.checkUser, changeEntry);
+    router.delete('/:kind/:entryId', validateEntry, middleware.checkKind, middleware.checkEntry, middleware.checkUser, deleteEntry);
+    router.post('/:kind/_find', middleware.checkKind, middleware.checkUser, queryEntry);
 
     // attachments methods
-    router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
-    router.put('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, replaceAttachment);
+    router.get('/:kind/:entryId/:attachmentId', validateAttachment, middleware.checkKind, middleware.checkEntry, getAttachment);
+    router.put('/:kind/:entryId/:attachmentId', validateAttachment, middleware.checkKind, middleware.checkEntry, replaceAttachment);
 
     return router.middleware();
-
-    // middlewares
-
-    function* checkUser(next) {
-        if (!this.state.user) {
-            this.state.user = {
-                email: 'test@test.com'
-            };
-        }
-        yield next;
-    }
-
-    function* checkKind(next) {
-        try {
-            this.state.hds_kind = yield hds.Kind.get(this.params.kind);
-        } catch (e) {
-            return this.hds_jsonError(404, 'kind ' + this.params.kind + ' not found');
-        }
-        yield next;
-    }
-
-    function* checkEntry(next) {
-        var entry = yield this.state.hds_kind.findOne({_id: this.params.entryId}).exec();
-        if (entry) {
-            this.state.hds_entry = entry;
-            yield next;
-        } else {
-            this.hds_jsonError(404, 'entry ' + this.params.entryId + ' not found');
-        }
-    }
 
     // entries methods
 

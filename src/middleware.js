@@ -37,3 +37,31 @@ exports.validateParameters = function (params) {
         yield next;
     };
 };
+
+exports.checkUser = function*(next) {
+    if (!this.state.user) {
+        this.state.user = {
+            email: 'test@test.com'
+        };
+    }
+    yield next;
+};
+
+exports.checkKind = function*(next) {
+    try {
+        this.state.hds_kind = yield hds.Kind.get(this.params.kind);
+    } catch (e) {
+        return this.hds_jsonError(404, 'kind ' + this.params.kind + ' not found');
+    }
+    yield next;
+};
+
+exports.checkEntry = function*(next) {
+    var entry = yield this.state.hds_kind.findOne({_id: this.params.entryId}).exec();
+    if (entry) {
+        this.state.hds_entry = entry;
+        yield next;
+    } else {
+        this.hds_jsonError(404, 'entry ' + this.params.entryId + ' not found');
+    }
+};
