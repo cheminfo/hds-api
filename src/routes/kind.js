@@ -10,6 +10,7 @@ module.exports = function (hds) {
     // kinds methods
     router.post('/_new/:kind', middleware.checkUser, createKind);
     router.put('/:kind', middleware.checkKind, middleware.checkUser, updateKind);
+    router.delete('/:kind', middleware.checkKind, middleware.checkUser, deleteKind);
 
     return router.middleware();
 
@@ -38,6 +39,15 @@ module.exports = function (hds) {
                     this.state.hds_kind[i] = this.request.body[d];
             yield this.state.hds_kind.save();
             this.body = {status: 'modified'};
+        } catch (err) {
+            this.hds_jsonError(500, err);
+        }
+    }
+
+    function* deleteKind() {
+        try {
+            yield this.state.hds_kind.remove();
+            this.body = {status: 'deleted'};
         } catch (err) {
             this.hds_jsonError(500, err);
         }
