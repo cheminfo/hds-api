@@ -50,7 +50,7 @@ module.exports = function hdsAPIFactory(hds, options) {
 
     router.get('/', function *() {
         this.body = {
-            eln: 'Welcome to the hds JSON API',
+            hds: 'Welcome to the hds JSON API',
             version: '0.0.1'
         };
     });
