@@ -50,10 +50,9 @@ module.exports = function (hds) {
 
     function* createKind () {
         var data = this.request.body;
-        console.log(data);
         try {
             var value = yield hds.Kind.create(this.params.kind, data).save();
-            console.log(value);
+
             this.body = {
                 status: 'created',
                 kindID: value._id

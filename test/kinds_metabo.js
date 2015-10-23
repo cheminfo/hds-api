@@ -4,11 +4,6 @@ var hds = require('hds');
 var Kind = hds.Kind;
 var Schema = hds.Schema;
 
-Kind.create("defkinds",{
-    name: String,
-    defschema: String
-});
-
 Kind.create('project', {
     name: String,
     description: String,
@@ -72,7 +67,7 @@ Kind.create('nmrSetup', {
     parameters: String,
     experiments:[ String ],
     machine: {id: String, config: String},
-    todo: {type: Boolean, default:true},
+    todo: {type: Boolean, default:true}
 });
 
 

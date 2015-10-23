@@ -138,9 +138,9 @@ module.exports = function (hds) {
     function* getChildrenR(){
         try{
             var data = this.request.body;
+            var deep = JSON.parse(data.includeChildren);
+            if(deep){
 
-            if(data.includeChildren){
-                var deep = data.includeChildren;
                 if(typeof deep !== "number"){
                     deep = 1;
                 }
@@ -174,7 +174,6 @@ module.exports = function (hds) {
 
 
         }catch (err) {
-            console.log("Heres "+err);
             this.hds_jsonError(500, err);
         }
     }
