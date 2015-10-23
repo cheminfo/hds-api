@@ -20,14 +20,23 @@ function onSuccess() {
     //getChildren
     var app = hdsapi(hds);
     var agent = request.agent(app.callback());
-    agent.post('/entry/project/_find')
-        .send({query: {},includeChildren:1})
+    agent.get('/kind/_list/all')
         .expect(200)
         .expect('Content-Type', regJson)
         .end(function (err, res) {
             if (err) throw err;
             console.log('got it:',JSON.stringify(res.body));
         });
+    /*
+    agent.post('/entry/project/_find')
+        .send({query: {},includeChildren:2, childrenKind:"patient"})
+        .expect(200)
+        .expect('Content-Type', regJson)
+        .end(function (err, res) {
+            if (err) throw err;
+            console.log('got it:',JSON.stringify(res.body));
+        });
+    */
 
     // creates a kind
    /* agent.post('/kind/_new/catalogEntry')

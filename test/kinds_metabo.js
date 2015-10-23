@@ -4,6 +4,11 @@ var hds = require('hds');
 var Kind = hds.Kind;
 var Schema = hds.Schema;
 
+Kind.create("defkinds",{
+    name: String,
+    defschema: String
+});
+
 Kind.create('project', {
     name: String,
     description: String,

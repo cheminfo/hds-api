@@ -20,7 +20,7 @@ module.exports = function (hds) {
     router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, getEntry);
     router.put('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, changeEntry);
     router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, deleteEntry);
-    router.post('/:kind/_find', checkKind, checkUser, queryEntry);
+    router.post('/:kind/_find', checkKind, checkUser, queryEntry, getChildrenR);
 
     // attachments methods
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
@@ -106,7 +106,7 @@ module.exports = function (hds) {
         }
     }
 
-    function* queryEntry() {
+    function* queryEntry(next) {
         try {
             var data = this.request.body;
             var from = data.from || 0;
@@ -116,38 +116,65 @@ module.exports = function (hds) {
                 .skip(from)
                 .limit(limit)
                 .exec();
+
+            if (!entries)
+                this.hds_jsonError(404, 'entries ' + this.request.find.query + ' not found');
+            this.state.root = {
+                from: from,
+                to: entries.length + from,
+                total: entries.length,
+                entry: entries,
+                deep:0
+            };
+
+            yield next;
+
+        } catch (err) {
+            console.log("Or here "+err);
+            this.hds_jsonError(500, err);
+        }
+    }
+
+    function* getChildrenR(){
+        try{
+            var data = this.request.body;
+
             if(data.includeChildren){
                 var deep = data.includeChildren;
                 if(typeof deep !== "number"){
                     deep = 1;
                 }
+                var entries = this.state.root.entry;
+
                 var childrenKind = data.childrenKind||"";
+
+                var currentList = {list:entries,level:0};
                 //yield getChildrenR(childrenKind,deep);
-                if(deep>0){
-                    for(var i=0;i<entries.length;i++){
+                while(deep>0&&currentList.level<deep){
+                    var chLevel = {list:[],level:currentList.level+1};
+                    for(var i=0;i<currentList.list.length;i++){
                         var ch = [];
                         if(childrenKind!=="") {
-                            ch = yield entries[i].getChildren({kind: childrenKind});
+                            ch = yield currentList.list[i].getChildren({kind: childrenKind});
                         }
                         else{
-                            ch = yield entries[i].getChildren();
+                            ch = yield currentList.list[i].getChildren();
                         }
 
                         for(var j=0;j<ch.length;j++){
-                            entries[i]._ch[j] = ch[j];
+                            currentList.list[i]._ch[j] = ch[j];
+                            chLevel.list.push(ch[j]);
                         }
                     }
+                    currentList = chLevel;
                 }
             }
-            if (!entries)
-                this.hds_jsonError(404, 'entries ' + this.request.find.query + ' not found');
-            this.body = {
-                from: from,
-                to: entries.length + from,
-                total: entries.length,
-                entry: entries
-            };
-        } catch (err) {
+
+            this.body = this.state.root;
+
+
+        }catch (err) {
+            console.log("Heres "+err);
             this.hds_jsonError(500, err);
         }
     }
