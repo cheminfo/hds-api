@@ -8,7 +8,7 @@ var Kind = hds.Kind;
 var regJson = /application\/json/;
 
 // Load kinds
-require('./kinds');
+require('./kinds_metabo');
 
 var connection = hds.init({
     database: require('./mongo.json')
@@ -17,11 +17,20 @@ var connection = hds.init({
 connection.then(onSuccess, onError);
 
 function onSuccess() {
+    //getChildren
     var app = hdsapi(hds);
     var agent = request.agent(app.callback());
+    agent.post('/entry/project/_find')
+        .send({query: {},includeChildren:1})
+        .expect(200)
+        .expect('Content-Type', regJson)
+        .end(function (err, res) {
+            if (err) throw err;
+            console.log('got it:',JSON.stringify(res.body));
+        });
 
     // creates a kind
-    agent.post('/kind/_new/catalogEntry')
+   /* agent.post('/kind/_new/catalogEntry')
         .send({
             id: {
                 type: 'string',
@@ -36,7 +45,7 @@ function onSuccess() {
             if (err) throw err;
             var ans = (res.body.status == 'created');
             if (ans) console.log('created with id:', res.body.kindID);
-        });
+        });*/
 }
 
 function onError(e) {

@@ -116,6 +116,29 @@ module.exports = function (hds) {
                 .skip(from)
                 .limit(limit)
                 .exec();
+            if(data.includeChildren){
+                var deep = data.includeChildren;
+                if(typeof deep !== "number"){
+                    deep = 1;
+                }
+                var childrenKind = data.childrenKind||"";
+                //yield getChildrenR(childrenKind,deep);
+                if(deep>0){
+                    for(var i=0;i<entries.length;i++){
+                        var ch = [];
+                        if(childrenKind!=="") {
+                            ch = yield entries[i].getChildren({kind: childrenKind});
+                        }
+                        else{
+                            ch = yield entries[i].getChildren();
+                        }
+
+                        for(var j=0;j<ch.length;j++){
+                            entries[i]._ch[j] = ch[j];
+                        }
+                    }
+                }
+            }
             if (!entries)
                 this.hds_jsonError(404, 'entries ' + this.request.find.query + ' not found');
             this.body = {
