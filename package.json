@@ -31,7 +31,7 @@
     "mocha-better-spec-reporter": "latest",
     "should": "latest",
     "supertest": "latest",
-    "hds": "latest"
+    "hds": "0.6.1"
   },
   "dependencies": {
     "koa": "^1.0.0",
