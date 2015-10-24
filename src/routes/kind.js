@@ -10,8 +10,9 @@ module.exports = function (hds) {
     // kinds methods
     router.post('/_new/:kind', checkUser, createKind);
     router.delete('/:kind', checkKind, checkUser, deleteKind);
+    //router.put('/:kind', checkKind, checkUser, updateKind);
     router.get('/:kind', checkKind, checkUser, getKind);
-    router.get('/_list/all', checkUser, listKinds);
+    router.get('/_list', checkUser, listKinds);
 
     return router.middleware();
 
@@ -77,7 +78,7 @@ module.exports = function (hds) {
 
     function* getKind() {
         try {
-            this.body = this.state.hds_kind;
+            this.body = this.state.hds_kind.getSchema();
         } catch (err) {
             this.hds_jsonError(500, err);
         }
@@ -85,8 +86,7 @@ module.exports = function (hds) {
 
     function* listKinds(){
         try {
-            var entries = hds.Kind.listKinds();
-            this.body = entries;
+            this.body = hds.Kind.getList();
         } catch (err) {
             this.hds_jsonError(500, err);
         }
