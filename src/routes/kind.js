@@ -9,7 +9,6 @@ module.exports = function (hds) {
 
     // kinds methods
     router.post('/_new/:kind', checkUser, createKind);
-    router.put('/:kind', checkKind, checkUser, updateKind);
     router.delete('/:kind', checkKind, checkUser, deleteKind);
     router.get('/:kind', checkKind, checkUser, getKind);
     router.get('/_list/all', checkUser, listKinds);
@@ -36,16 +35,6 @@ module.exports = function (hds) {
         yield next;
     }
 
-    function* checkEntry (next) {
-        var entry = yield this.state.hds_kind.findOne({_id: this.params.entryId}).exec();
-        if (entry) {
-            this.state.hds_entry = entry;
-            yield next;
-        } else {
-            this.hds_jsonError(404, 'entry ' + this.params.entryId + ' not found');
-        }
-    }
-
     // kinds methods
 
     function* createKind () {
@@ -62,6 +51,7 @@ module.exports = function (hds) {
         }
     }
 
+    /*
     function* updateKind () {
         var data = this.request.body;
         try {
@@ -74,6 +64,7 @@ module.exports = function (hds) {
             this.hds_jsonError(500, err);
         }
     }
+    */
 
     function* deleteKind() {
         try {
