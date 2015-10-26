@@ -8,7 +8,7 @@ module.exports = function (hds) {
     var router = new Router();
 
     // kinds methods
-    router.post('/_new/:kind', checkUser, createKind);
+    router.post('/_new/:kind', checkUser, checkPostForm, createKind);
     router.put('/:kind', checkKind, checkUser, updateKind);
     router.delete('/:kind', checkKind, checkUser, deleteKind);
     router.get('/:kind', checkKind, checkUser, getKind);
@@ -46,10 +46,23 @@ module.exports = function (hds) {
         }
     }
 
+    function* checkPostForm (next) {
+        try {
+            this.state.post_form = this.request.body;
+            if(this.state.post_form._form){
+                this.state.post_form = this.state.post_form._form;
+            }
+        } catch (e) {
+            return this.hds_jsonError(404, 'Problems with the post form parameter');
+        }
+        yield next;
+    }
+
     // kinds methods
 
     function* createKind () {
-        var data = this.request.body;
+        //var data = this.request.body;
+        var data = this.state.post_form
         try {
             var value = yield hds.Kind.create(this.params.kind, data).save();
 

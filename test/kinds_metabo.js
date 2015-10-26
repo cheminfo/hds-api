@@ -8,7 +8,7 @@ Kind.create('project', {
     name: String,
     description: String,
     keywords: [String],
-    metadata:Object
+    metadata: Object
 });
 
 Kind.create('entity', {

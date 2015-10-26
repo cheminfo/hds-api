@@ -18,7 +18,7 @@ var connection = hds.init({
 
 connection.then(function (err) {
     if (err) throw err;
-    var app = hdsapi(hds);
+    var app = hdsapi(hds,{cors:{origin:"www.cheminfo.org"}});
 
     app.listen(3000);
 });

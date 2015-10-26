@@ -16,11 +16,11 @@ module.exports = function (hds) {
     var router = new Router();
 
     // entries methods
-    router.post('/:kind', checkKind, checkUser, createEntry);
+    router.post('/:kind', checkKind, checkUser, checkPostForm, createEntry);
     router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, getEntry);
     router.put('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, changeEntry);
     router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, deleteEntry);
-    router.post('/:kind/_find', checkKind, checkUser, queryEntry, getChildrenR);
+    router.post('/:kind/_find', checkKind, checkUser, checkPostForm, queryEntry, getChildren);
 
     // attachments methods
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
@@ -58,6 +58,20 @@ module.exports = function (hds) {
         }
     }
 
+    function* checkPostForm (next) {
+        try {
+            this.state.post_form = this.request.body;
+            if(this.state.post_form._form){
+                this.state.post_form = this.state.post_form._form;
+            }
+        } catch (e) {
+            return this.hds_jsonError(404, 'Problems with the post form parameter');
+        }
+        yield next;
+    }
+
+
+
     // entries methods
 
     function* getEntry() {
@@ -73,7 +87,10 @@ module.exports = function (hds) {
     }
 
     function* createEntry() {
-        var data = this.request.body;
+        //var data = this.request.body;
+        var data  = this.state.post_form;
+        console.log(this.params.kind);
+        console.log(data);
         try {
             var value = yield hds.Entry.create(this.params.kind, data, {owner: this.state.user.email}).save();
             this.body = {
@@ -108,7 +125,8 @@ module.exports = function (hds) {
 
     function* queryEntry(next) {
         try {
-            var data = this.request.body;
+            //var data = this.request.body;
+            var data  = this.state.post_form;
             var from = data.from || 0;
             var limit = data.limit || 20;
             var entries = yield this.state.hds_kind
@@ -135,7 +153,7 @@ module.exports = function (hds) {
         }
     }
 
-    function* getChildrenR(){
+    function* getChildren(){
         try{
             var data = this.request.body;
             var deep = JSON.parse(data.includeChildren);
