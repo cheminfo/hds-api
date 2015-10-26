@@ -8,11 +8,12 @@ module.exports = function (hds) {
     var router = new Router();
 
     // kinds methods
+
     router.post('/_new/:kind', checkUser, checkPostForm, createKind);
-    router.put('/:kind', checkKind, checkUser, updateKind);
     router.delete('/:kind', checkKind, checkUser, deleteKind);
+    //router.put('/:kind', checkKind, checkUser, updateKind);
     router.get('/:kind', checkKind, checkUser, getKind);
-    router.get('/_list/all', checkUser, listKinds);
+    router.get('/_list', checkUser, listKinds);
 
     return router.middleware();
 
@@ -35,7 +36,7 @@ module.exports = function (hds) {
         }
         yield next;
     }
-
+    
     function* checkEntry (next) {
         var entry = yield this.state.hds_kind.findOne({_id: this.params.entryId}).exec();
         if (entry) {
@@ -57,7 +58,6 @@ module.exports = function (hds) {
         }
         yield next;
     }
-
     // kinds methods
 
     function* createKind () {
@@ -75,6 +75,7 @@ module.exports = function (hds) {
         }
     }
 
+    /*
     function* updateKind () {
         var data = this.request.body;
         try {
@@ -87,6 +88,7 @@ module.exports = function (hds) {
             this.hds_jsonError(500, err);
         }
     }
+    */
 
     function* deleteKind() {
         try {
@@ -99,7 +101,7 @@ module.exports = function (hds) {
 
     function* getKind() {
         try {
-            this.body = this.state.hds_kind;
+            this.body = this.state.hds_kind.getSchema();
         } catch (err) {
             this.hds_jsonError(500, err);
         }
@@ -107,8 +109,7 @@ module.exports = function (hds) {
 
     function* listKinds(){
         try {
-            var entries = hds.Kind.listKinds();
-            this.body = entries;
+            this.body = hds.Kind.getList();
         } catch (err) {
             this.hds_jsonError(500, err);
         }
