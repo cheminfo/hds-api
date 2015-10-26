@@ -89,8 +89,6 @@ module.exports = function (hds) {
     function* createEntry() {
         //var data = this.request.body;
         var data  = this.state.post_form;
-        console.log(this.params.kind);
-        console.log(data);
         try {
             var value = yield hds.Entry.create(this.params.kind, data, {owner: this.state.user.email}).save();
             this.body = {

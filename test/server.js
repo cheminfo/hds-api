@@ -12,7 +12,7 @@ var connection = hds.init({
         "name": "metabo-test",
         "username": null,
         "password": null,
-        "port": 27119
+        "port": 27117
     }
 });
 
