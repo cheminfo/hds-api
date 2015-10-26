@@ -64,13 +64,14 @@ module.exports = function (hds) {
         //var data = this.request.body;
         var data = this.state.post_form
         try {
-            var value = yield hds.Kind.create(this.params.kind, data).save();
-
+            var value = hds.Kind.create(this.params.kind, data);
             this.body = {
-                status: 'created',
-                kindID: value._id
+                status: 'created'//,
+                //kindID: value._id
             };
+
         } catch (err) {
+            console.log(err);
             this.hds_jsonError(500, err);
         }
     }

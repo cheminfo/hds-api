@@ -28,8 +28,24 @@ function onSuccess() {
             console.log('got it:',JSON.stringify(res.body));
         });*/
 
+    agent.post('/kind/_new/catalogEntry2')
+        .send({
+            id: {
+                type: 'string',
+                required: true
+            },
+            name: 'string',
+            cat: ['string']
+        })
+        .expect(200)
+        .expect('Content-Type', regJson)
+        .end(function (err, res) {
+            if (err) throw err;
+            var ans = (res.body.status == 'created');
+            if (ans) console.log('created with id:', res.body.kindID);
+        });
 
-    agent.post('/entry/project/_find')
+    /*agent.post('/entry/project/_find')
         .send({query: {}, includeChildren:2, childrenKind:"patient"})
         .expect(200)
         .expect('Content-Type', regJson)
@@ -38,7 +54,7 @@ function onSuccess() {
             console.log('got it:',JSON.stringify(res.body));
         });
 
-
+*/
     // creates a kind
    /* agent.post('/kind/_new/catalogEntry')
         .send({
