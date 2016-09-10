@@ -16,11 +16,11 @@ module.exports = function (hds) {
     var router = new Router();
 
     // entries methods
-    router.post('/:kind', checkKind, checkUser, createEntry);
+    router.post('/:kind', checkKind, checkUser, checkPostForm, createEntry);
     router.get('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, getEntry);
     router.put('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, changeEntry);
     router.delete('/:kind/:entryId', validateEntry, checkKind, checkEntry, checkUser, deleteEntry);
-    router.post('/:kind/_find', checkKind, checkUser, queryEntry);
+    router.post('/:kind/_find', checkKind, checkUser, checkPostForm, queryEntry, getChildren);
 
     // attachments methods
     router.get('/:kind/:entryId/:attachmentId', validateAttachment, checkKind, checkEntry, getAttachment);
@@ -30,7 +30,7 @@ module.exports = function (hds) {
 
     // middlewares
 
-    function* checkUser(next) {
+    function* checkUser (next) {
         if (!this.state.user) {
             this.state.user = {
                 email: 'test@test.com'
@@ -39,7 +39,7 @@ module.exports = function (hds) {
         yield next;
     }
 
-    function* checkKind(next) {
+    function* checkKind (next) {
         try {
             this.state.hds_kind = yield hds.Kind.get(this.params.kind);
         } catch (e) {
@@ -48,7 +48,7 @@ module.exports = function (hds) {
         yield next;
     }
 
-    function* checkEntry(next) {
+    function* checkEntry (next) {
         var entry = yield this.state.hds_kind.findOne({_id: this.params.entryId}).exec();
         if (entry) {
             this.state.hds_entry = entry;
@@ -57,6 +57,20 @@ module.exports = function (hds) {
             this.hds_jsonError(404, 'entry ' + this.params.entryId + ' not found');
         }
     }
+
+    function* checkPostForm (next) {
+        try {
+            this.state.post_form = this.request.body;
+            if(this.state.post_form._form){
+                this.state.post_form = this.state.post_form._form;
+            }
+        } catch (e) {
+            return this.hds_jsonError(404, 'Problems with the post form parameter');
+        }
+        yield next;
+    }
+
+
 
     // entries methods
 
@@ -73,7 +87,8 @@ module.exports = function (hds) {
     }
 
     function* createEntry() {
-        var data = this.request.body;
+        //var data = this.request.body;
+        var data  = this.state.post_form;
         try {
             var value = yield hds.Entry.create(this.params.kind, data, {owner: this.state.user.email}).save();
             this.body = {
@@ -106,9 +121,10 @@ module.exports = function (hds) {
         }
     }
 
-    function* queryEntry() {
+    function* queryEntry(next) {
         try {
-            var data = this.request.body;
+            //var data = this.request.body;
+            var data  = this.state.post_form;
             var from = data.from || 0;
             var limit = data.limit || 20;
             var entries = yield this.state.hds_kind
@@ -116,15 +132,64 @@ module.exports = function (hds) {
                 .skip(from)
                 .limit(limit)
                 .exec();
+
             if (!entries)
                 this.hds_jsonError(404, 'entries ' + this.request.find.query + ' not found');
-            this.body = {
+            this.state.root = {
                 from: from,
                 to: entries.length + from,
                 total: entries.length,
-                entry: entries
+                entry: entries,
+                deep:0
             };
+
+            yield next;
+
         } catch (err) {
+            console.log("Or here "+err);
+            this.hds_jsonError(500, err);
+        }
+    }
+
+    function* getChildren(){
+        try{
+            var data = this.request.body;
+            var deep = JSON.parse(data.includeChildren);
+            if(deep){
+
+                if(typeof deep !== "number"){
+                    deep = 1;
+                }
+                var entries = this.state.root.entry;
+
+                var childrenKind = data.childrenKind||"";
+
+                var currentList = {list:entries,level:0};
+                //yield getChildrenR(childrenKind,deep);
+                while(deep>0&&currentList.level<deep){
+                    var chLevel = {list:[],level:currentList.level+1};
+                    for(var i=0;i<currentList.list.length;i++){
+                        var ch = [];
+                        if(childrenKind!=="") {
+                            ch = yield currentList.list[i].getChildren({kind: childrenKind});
+                        }
+                        else{
+                            ch = yield currentList.list[i].getChildren();
+                        }
+
+                        for(var j=0;j<ch.length;j++){
+                            currentList.list[i]._ch[j] = ch[j];
+                            chLevel.list.push(ch[j]);
+                        }
+                    }
+                    currentList = chLevel;
+                }
+            }
+
+            this.body = this.state.root;
+
+
+        }catch (err) {
             this.hds_jsonError(500, err);
         }
     }

@@ -8,7 +8,7 @@ var Kind = hds.Kind;
 var regJson = /application\/json/;
 
 // Load kinds
-require('./kinds');
+require('./kinds_metabo');
 
 var connection = hds.init({
     database: require('./mongo.json')
@@ -17,31 +17,61 @@ var connection = hds.init({
 connection.then(onSuccess, onError);
 
 function onSuccess() {
+    //getChildren
     var app = hdsapi(hds);
     var agent = request.agent(app.callback());
+    /*agent.get('/kind/_list/all')
+        .expect(200)
+        .expect('Content-Type', regJson)
+        .end(function (err, res) {
+            if (err) throw err;
+            console.log('got it:',JSON.stringify(res.body));
+        });*/
 
-    // creates an entry
-    agent.post('/entry/experiment')
-        .send({name:'myExperiment1',id:'def456'})
+    agent.post('/kind/_new/catalogEntry2')
+        .send({
+            id: {
+                type: 'string',
+                required: true
+            },
+            name: 'string',
+            cat: ['string']
+        })
         .expect(200)
         .expect('Content-Type', regJson)
         .end(function (err, res) {
             if (err) throw err;
             var ans = (res.body.status == 'created');
-            if (ans) console.log('created with id:', res.body.entryID);
-
-            // change entry
-            agent.put('/entry/experiment/'+res.body.entryID)
-                .send({name:'myExperiment2',id:'ghi789'})
-                .expect(200)
-                .expect('Content-Type', regJson)
-                .end(function (err, res) {
-                    if (err) throw err;
-                    var ans = (res.body.status == 'modified');
-                    if (ans) console.log('modified');
-                    process.exit(0);
-                });
+            if (ans) console.log('created with id:', res.body.kindID);
         });
+
+    /*agent.post('/entry/project/_find')
+        .send({query: {}, includeChildren:2, childrenKind:"patient"})
+        .expect(200)
+        .expect('Content-Type', regJson)
+        .end(function (err, res) {
+            if (err) throw err;
+            console.log('got it:',JSON.stringify(res.body));
+        });
+
+*/
+    // creates a kind
+   /* agent.post('/kind/_new/catalogEntry')
+        .send({
+            id: {
+                type: 'string',
+                required: true
+            },
+            name: 'string',
+            cat: ['string']
+        })
+        .expect(200)
+        .expect('Content-Type', regJson)
+        .end(function (err, res) {
+            if (err) throw err;
+            var ans = (res.body.status == 'created');
+            if (ans) console.log('created with id:', res.body.kindID);
+        });*/
 }
 
 function onError(e) {
